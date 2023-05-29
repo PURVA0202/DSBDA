@@ -1,0 +1,28 @@
+[cloudera@quickstart Desktop]$ hive
+
+hive> create external table cust_info(cust_id int, cust_name string, order_id int) row format delimited fields terminated by "," stored as textfile location "/home/cloudera/Desktop/cust.txt";
+OK
+Time taken: 0.086 seconds
+hive> load data local inpath "/home/cloudera/Desktop/cust.txt" into table cust_info;
+
+hive> create external table order_info(order_id int, item_id int, qty int) row format delimited fields terminated by "," stored as textfile location "/home/cloudera/Desktop/order.txt";
+OK
+Time taken: 0.056 seconds
+hive> load data local inpath "/home/cloudera/Desktop/order.txt" into table order_info;
+
+hive> create external table item_info(item_id int, item_name string, item_price int) row format delimited fields terminated by "," stored as textfile location "/home/cloudera/Desktop/item.txt";
+OK
+Time taken: 0.063 seconds
+hive> load data local inpath "/home/cloudera/Desktop/item.txt" into table item_info;
+
+hive> select t1.order_id, sum(t1.qty * t2.item_price) as tot from order_info t1 join item_info t2 on t1.item_id=t2.item_id group by t1.order_id order by tot DESC; 
+
+average sales-
+select avg(tot) from (select t1.order_id, sum(t1.qty * t2.item_price) as tot from order_info t1 join item_info t2 on t1.item_id=t2.item_id group by t1.order_id order by tot DESC) as tb1;
+
+index
+create index index1 on table cust_info(cust_id) as 'BITMAP' with deferred rebuild;
+
+max order .
+select t1.qty, t2.item_name, t2.item_price from order_info t1 join item_info t2 on t1.item_id=t2.item_id where t1.order_id=30;
+
